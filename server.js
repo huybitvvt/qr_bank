@@ -864,20 +864,25 @@ function resolveAuthMode() {
 }
 
 function env(key, fallback) {
-  if (!(key in process.env) || process.env[key] === "") return fallback;
-  return String(process.env[key]).replace(/^\uFEFF/, "").trim();
+  const value = cleanEnvValue(key);
+  return value === "" ? fallback : value;
 }
 
 function numberEnv(key, fallback) {
-  const value = Number(process.env[key]);
+  const value = Number(cleanEnvValue(key));
   return Number.isFinite(value) && value > 0 ? value : fallback;
 }
 
 function boolEnv(key, fallback) {
-  const value = String(process.env[key] || "").toLowerCase();
+  const value = cleanEnvValue(key).toLowerCase();
   if (["true", "1", "yes", "y"].includes(value)) return true;
   if (["false", "0", "no", "n"].includes(value)) return false;
   return fallback;
+}
+
+function cleanEnvValue(key) {
+  if (!(key in process.env) || process.env[key] === "") return "";
+  return String(process.env[key]).replace(/^\uFEFF/, "").trim();
 }
 
 function isAdminAuthorized(req, requestUrl) {
