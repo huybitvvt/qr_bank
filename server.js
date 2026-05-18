@@ -653,19 +653,36 @@ function createSupabaseStorage() {
   const restBase = `${config.supabaseUrl}/rest/v1`;
   const headers = {
     apikey: config.supabaseServiceRoleKey,
-    Authorization: `Bearer ${config.supabaseServiceRoleKey}`,
-    "Content-Type": "application/json"
+    "Content-Type": "application/json",
+    "X-Client-Info": "gsheets-sepay-checkout/1.0"
   };
+  if (!config.supabaseServiceRoleKey.startsWith("sb_secret_")) {
+    headers.Authorization = `Bearer ${config.supabaseServiceRoleKey}`;
+  }
 
   async function request(table, options = {}) {
-    const response = await fetch(`${restBase}/${table}${options.query || ""}`, {
-      method: options.method || "GET",
-      headers: {
-        ...headers,
-        ...(options.headers || {})
-      },
-      body: options.body ? JSON.stringify(options.body) : undefined
-    });
+    const url = `${restBase}/${table}${options.query || ""}`;
+    let response;
+    for (let attempt = 1; attempt <= 3; attempt += 1) {
+      try {
+        response = await fetch(url, {
+          method: options.method || "GET",
+          headers: {
+            ...headers,
+            ...(options.headers || {})
+          },
+          body: options.body ? JSON.stringify(options.body) : undefined
+        });
+        if (!response.ok && response.status >= 500 && attempt < 3) {
+          await delay(250 * attempt);
+          continue;
+        }
+        break;
+      } catch (error) {
+        if (attempt >= 3) throw error;
+        await delay(250 * attempt);
+      }
+    }
     const text = await response.text();
     const data = text ? JSON.parse(text) : null;
     if (!response.ok) {
@@ -719,6 +736,10 @@ function createSupabaseStorage() {
       }
     }
   };
+}
+
+function delay(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 function orderToRow(order) {
