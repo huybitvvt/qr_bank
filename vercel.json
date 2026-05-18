@@ -2,10 +2,7 @@
   "version": 2,
   "functions": {
     "api/index.js": {
-      "includeFiles": [
-        "public/**",
-        "gsheets-template-list/**"
-      ]
+      "includeFiles": "{public/**,gsheets-template-list/**}"
     }
   },
   "routes": [
