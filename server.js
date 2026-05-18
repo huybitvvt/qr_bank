@@ -38,8 +38,13 @@ const config = {
 const catalog = loadCatalog();
 const storage = createStorage();
 let db = { orders: [], transactions: [] };
+let dbReadyError = null;
 let dbReady = storage.load().then((loaded) => {
   db = loaded;
+  return db;
+}).catch((error) => {
+  dbReadyError = error;
+  console.error(`Database initialization failed: ${error.message}`);
   return db;
 });
 
@@ -120,6 +125,9 @@ async function initialize() {
 
 async function refreshDbForRequest() {
   await dbReady;
+  if (dbReadyError) {
+    throw dbReadyError;
+  }
   if (storage.name === "supabase") {
     db = await storage.load();
   }
@@ -602,7 +610,7 @@ function redirect(res, location) {
 function createStorage() {
   if (config.supabaseServiceRoleKey.startsWith("sb_publishable_")) {
     const message = "SUPABASE_SERVICE_ROLE_KEY is a publishable key. Use the Supabase service_role secret key on the server.";
-    if (config.databaseMode === "supabase") throw new Error(message);
+    if (config.databaseMode === "supabase") return createUnavailableStorage(message);
     console.warn(`${message} Falling back to local JSON.`);
     return createLocalStorage();
   }
@@ -612,9 +620,21 @@ function createStorage() {
     return createSupabaseStorage();
   }
   if (config.databaseMode === "supabase") {
-    throw new Error("DATABASE_MODE=supabase requires SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY");
+    return createUnavailableStorage("DATABASE_MODE=supabase requires SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY");
   }
   return createLocalStorage();
+}
+
+function createUnavailableStorage(message) {
+  return {
+    name: "unavailable",
+    async load() {
+      throw new Error(message);
+    },
+    async save() {
+      throw new Error(message);
+    }
+  };
 }
 
 function createLocalStorage() {
