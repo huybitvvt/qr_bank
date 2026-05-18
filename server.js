@@ -924,6 +924,5 @@ function mimeType(ext) {
   }[ext] || "application/octet-stream";
 }
 
-module.exports = {
-  handleRequest
-};
+module.exports = handleRequest;
+module.exports.handleRequest = handleRequest;

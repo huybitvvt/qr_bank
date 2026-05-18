@@ -1,3 +1,3 @@
-const { handleRequest } = require("../server");
+const server = require("../server");
 
-module.exports = handleRequest;
+module.exports = server.handleRequest || server;
