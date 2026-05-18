@@ -11,7 +11,9 @@ loadEnv(path.join(rootDir, ".env"));
 const mirrorRoot = path.join(rootDir, "gsheets-template-list");
 const siteRoot = path.join(mirrorRoot, "gsheets.vn");
 const publicRoot = path.join(rootDir, "public");
-const dataDir = path.join(rootDir, "data");
+const dataDir = process.env.VERCEL
+  ? path.join(process.env.TMPDIR || "/tmp", "gsheets-sepay-checkout")
+  : path.join(rootDir, "data");
 const dbPath = path.join(dataDir, "db.json");
 
 const config = {
@@ -33,7 +35,6 @@ const config = {
   adminToken: env("ADMIN_TOKEN", "")
 };
 
-fs.mkdirSync(dataDir, { recursive: true });
 const catalog = loadCatalog();
 const storage = createStorage();
 let db = { orders: [], transactions: [] };
@@ -44,7 +45,6 @@ let dbReady = storage.load().then((loaded) => {
 
 async function handleRequest(req, res) {
   try {
-    await refreshDbForRequest();
     const requestUrl = new URL(req.url, config.publicBaseUrl);
     const pathname = decodeURIComponent(requestUrl.pathname);
 
@@ -57,6 +57,12 @@ async function handleRequest(req, res) {
     if (pathname === "/api/config" && req.method === "GET") {
       return sendJson(res, 200, { demoPaymentEnabled: config.demoPaymentEnabled });
     }
+
+    if (!pathname.startsWith("/api/")) {
+      return serveFile(pathname, res);
+    }
+
+    await refreshDbForRequest();
 
     if (pathname === "/api/orders" && req.method === "POST") {
       return handleCreateOrder(req, res);
@@ -83,7 +89,7 @@ async function handleRequest(req, res) {
       return handleTestMarkPaid(req, res);
     }
 
-    return serveFile(pathname, res);
+    return sendText(res, 404, "Not found");
   } catch (error) {
     console.error(error);
     return sendJson(res, 500, { error: "internal_error", message: "Server error" });
@@ -442,6 +448,10 @@ async function logWebhook(transactionId, status, rawBody, note) {
 
 function loadCatalog() {
   const pages = [path.join(siteRoot, "template", "index.html")];
+  if (!fs.existsSync(pages[0])) {
+    console.warn(`Catalog source not found: ${pages[0]}`);
+    return [];
+  }
   for (let page = 2; page <= 30; page += 1) {
     const file = path.join(siteRoot, "template", "page", String(page), "index.html");
     if (fs.existsSync(file)) pages.push(file);
@@ -777,6 +787,7 @@ async function saveDb() {
 }
 
 function saveLocalDb(nextDb) {
+  fs.mkdirSync(dataDir, { recursive: true });
   const tmp = `${dbPath}.tmp`;
   fs.writeFileSync(tmp, JSON.stringify(nextDb, null, 2));
   fs.renameSync(tmp, dbPath);
