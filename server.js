@@ -245,8 +245,10 @@ function handleSePayWebhook(req, res) {
     }
 
     if (order.status !== "paid" && order.status !== "activated") {
-      order.status = "paid";
-      order.paidAt = new Date().toISOString();
+      const paidAt = new Date().toISOString();
+      order.status = "activated";
+      order.paidAt = paidAt;
+      order.activatedAt = paidAt;
       order.transactionId = transactionId;
       order.activationCode = generateActivationCode(order);
       order.note = null;
@@ -331,8 +333,10 @@ function handleTestMarkPaid(req, res) {
       orderCode: order.code,
       rawBody: JSON.stringify(fakePayload)
     });
-    order.status = "paid";
-    order.paidAt = new Date().toISOString();
+    const paidAt = new Date().toISOString();
+    order.status = "activated";
+    order.paidAt = paidAt;
+    order.activatedAt = paidAt;
     order.transactionId = fakePayload.id;
     order.activationCode = generateActivationCode(order);
     await saveDb();
