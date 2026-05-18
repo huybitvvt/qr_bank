@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kích hoạt tài khoản</title>
+  <link rel="stylesheet" href="/assets/sepay-checkout.css">
+</head>
+<body class="sepay-page">
+  <main class="sepay-shell">
+    <header class="sepay-header">
+      <h1>Kích hoạt tài khoản</h1>
+      <a href="/template/">Về trang chủ</a>
+    </header>
+    <section class="sepay-panel">
+      <h2 data-title>Đang kiểm tra thanh toán</h2>
+      <div class="sepay-details">
+        <div class="sepay-row"><span>Sản phẩm</span><strong data-product></strong></div>
+        <div class="sepay-row"><span>Email</span><strong data-email></strong></div>
+        <div class="sepay-row"><span>Mã kích hoạt</span><strong class="sepay-code" data-code></strong></div>
+        <div class="sepay-row"><span>Trạng thái</span><strong data-status></strong></div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const token = new URLSearchParams(window.location.search).get("token");
+    const set = (name, value) => document.querySelector(`[data-${name}]`).textContent = value || "";
+
+    activate();
+
+    async function activate() {
+      if (!token) {
+        set("title", "Link kích hoạt không hợp lệ");
+        return;
+      }
+      try {
+        const response = await fetch("/api/activate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message || "Không thể kích hoạt");
+        set("title", "Kích hoạt thành công");
+        set("product", data.activation.productTitle);
+        set("email", data.activation.customerEmail);
+        set("code", data.activation.code);
+        set("status", data.activation.status);
+      } catch (error) {
+        set("title", error.message);
+      }
+    }
+  </script>
+</body>
+</html>

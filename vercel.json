@@ -1,0 +1,17 @@
+{
+  "version": 2,
+  "functions": {
+    "api/index.js": {
+      "includeFiles": [
+        "public/**",
+        "gsheets-template-list/**"
+      ]
+    }
+  },
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/api/index.js"
+    }
+  ]
+}

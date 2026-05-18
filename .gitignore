@@ -1,0 +1,8 @@
+.env
+data/
+data/*.log
+data/db.json
+data/db.json.tmp
+gsheets-template-list/hts-cache/
+gsheets-template-list/hts-log.txt
+gsheets-template-list/index.html

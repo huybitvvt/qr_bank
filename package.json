@@ -1,0 +1,14 @@
+{
+  "name": "gsheets-sepay-checkout",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Static clone wrapper with SePay VietQR checkout and activation webhook.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

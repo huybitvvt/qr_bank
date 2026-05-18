@@ -1,0 +1,316 @@
+.sepay-buy-button {
+  width: 100%;
+  min-height: 38px;
+  margin-top: 8px;
+  border: 0;
+  border-radius: 6px;
+  background: #087a4a;
+  color: #fff;
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 1.2;
+  cursor: pointer;
+  transition: background .18s ease, transform .18s ease;
+}
+
+.sepay-buy-button:hover {
+  background: #06643d;
+  transform: translateY(-1px);
+}
+
+.sepay-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 999999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  background: rgba(12, 22, 32, .58);
+}
+
+.sepay-modal-backdrop.is-open {
+  display: flex;
+}
+
+.sepay-modal {
+  width: min(100%, 430px);
+  border-radius: 8px;
+  background: #fff;
+  color: #1f2937;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, .22);
+  overflow: hidden;
+}
+
+.sepay-modal header,
+.sepay-modal main,
+.sepay-modal footer {
+  padding: 18px;
+}
+
+.sepay-modal header {
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.sepay-modal h3 {
+  margin: 0 28px 6px 0;
+  font-size: 20px;
+  line-height: 1.25;
+}
+
+.sepay-modal p {
+  margin: 0;
+}
+
+.sepay-modal .sepay-price {
+  color: #087a4a;
+  font-weight: 800;
+}
+
+.sepay-modal label {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 12px;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.sepay-modal input {
+  width: 100%;
+  min-height: 42px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 8px 10px;
+  font: inherit;
+}
+
+.sepay-modal footer {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  border-top: 1px solid #e5e7eb;
+}
+
+.sepay-modal button {
+  min-height: 40px;
+  border-radius: 6px;
+  padding: 8px 14px;
+  border: 1px solid #d1d5db;
+  background: #fff;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.sepay-modal button[type="submit"] {
+  border-color: #087a4a;
+  background: #087a4a;
+  color: #fff;
+}
+
+.sepay-modal-close {
+  position: absolute;
+  width: 34px;
+  height: 34px;
+  right: 12px;
+  top: 12px;
+  padding: 0;
+}
+
+.sepay-modal-error {
+  display: none;
+  margin-top: 10px;
+  color: #b91c1c;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.sepay-modal-error.is-visible {
+  display: block;
+}
+
+.sepay-page {
+  min-height: 100dvh;
+  margin: 0;
+  background: #f4f7f6;
+  color: #172026;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.sepay-shell {
+  width: min(100% - 32px, 980px);
+  margin: 0 auto;
+  padding: 32px 0;
+}
+
+.sepay-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.sepay-header h1 {
+  margin: 0;
+  font-size: clamp(24px, 3vw, 34px);
+  line-height: 1.15;
+}
+
+.sepay-header a {
+  color: #087a4a;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.sepay-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
+  gap: 18px;
+}
+
+.sepay-panel {
+  border: 1px solid #dfe7e3;
+  border-radius: 8px;
+  background: #fff;
+  padding: 20px;
+}
+
+.sepay-panel h2 {
+  margin: 0 0 12px;
+  font-size: 20px;
+}
+
+.sepay-details {
+  display: grid;
+  gap: 10px;
+}
+
+.sepay-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #edf1ef;
+}
+
+.sepay-row span:first-child {
+  color: #5f6f68;
+}
+
+.sepay-row strong {
+  text-align: right;
+}
+
+.sepay-qr {
+  display: grid;
+  place-items: center;
+  gap: 12px;
+}
+
+.sepay-qr img {
+  width: min(100%, 280px);
+  aspect-ratio: 1;
+  object-fit: contain;
+}
+
+.sepay-code {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  padding: 6px 12px;
+  border: 1px dashed #087a4a;
+  border-radius: 6px;
+  background: #effaf5;
+  color: #075f3b;
+  font-weight: 800;
+  letter-spacing: .5px;
+}
+
+.sepay-status {
+  margin-top: 14px;
+  border-radius: 6px;
+  padding: 12px;
+  font-weight: 800;
+  text-align: center;
+}
+
+.sepay-status[data-state="pending"] {
+  background: #fff7d6;
+  color: #865600;
+}
+
+.sepay-status[data-state="paid"],
+.sepay-status[data-state="activated"] {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.sepay-status[data-state="expired"] {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.sepay-primary-link {
+  display: none;
+  margin-top: 14px;
+  min-height: 42px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  background: #087a4a;
+  color: #fff;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.sepay-primary-link.is-visible {
+  display: flex;
+}
+
+.sepay-dev-button {
+  display: none;
+  width: 100%;
+  min-height: 42px;
+  margin-top: 10px;
+  border: 1px solid #b45309;
+  border-radius: 6px;
+  background: #fff7ed;
+  color: #92400e;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.sepay-dev-button.is-visible {
+  display: block;
+}
+
+.sepay-dev-button:disabled {
+  cursor: wait;
+  opacity: .75;
+}
+
+.sepay-admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+}
+
+.sepay-admin-table th,
+.sepay-admin-table td {
+  padding: 10px;
+  border-bottom: 1px solid #e5e7eb;
+  text-align: left;
+  vertical-align: top;
+}
+
+@media (max-width: 760px) {
+  .sepay-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sepay-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

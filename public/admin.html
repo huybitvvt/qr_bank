@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Đơn hàng SePay</title>
+  <link rel="stylesheet" href="/assets/sepay-checkout.css">
+</head>
+<body class="sepay-page">
+  <main class="sepay-shell">
+    <header class="sepay-header">
+      <h1>Đơn hàng SePay</h1>
+      <a href="/template/">Xem website</a>
+    </header>
+    <section class="sepay-panel">
+      <table class="sepay-admin-table">
+        <thead>
+          <tr>
+            <th>Mã</th>
+            <th>Khách</th>
+            <th>Sản phẩm</th>
+            <th>Số tiền</th>
+            <th>Trạng thái</th>
+          </tr>
+        </thead>
+        <tbody data-orders></tbody>
+      </table>
+    </section>
+  </main>
+  <script>
+    const token = new URLSearchParams(window.location.search).get("token") || "";
+    load();
+    async function load() {
+      const response = await fetch(`/api/admin/orders?token=${encodeURIComponent(token)}`);
+      const data = await response.json();
+      const body = document.querySelector("[data-orders]");
+      if (!response.ok) {
+        body.innerHTML = `<tr><td colspan="5">Không có quyền xem</td></tr>`;
+        return;
+      }
+      body.innerHTML = data.orders.map((order) => `
+        <tr>
+          <td>${escapeHtml(order.code)}</td>
+          <td>${escapeHtml(order.customerEmail)}</td>
+          <td>${escapeHtml(order.productTitle)}</td>
+          <td>${escapeHtml(order.amountText)}</td>
+          <td>${escapeHtml(order.status)}</td>
+        </tr>
+      `).join("");
+    }
+    function escapeHtml(value) {
+      return String(value || "").replace(/[&<>"']/g, (char) => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;"
+      }[char]));
+    }
+  </script>
+</body>
+</html>

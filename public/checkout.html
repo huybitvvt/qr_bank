@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Thanh toán VietQR</title>
+  <link rel="stylesheet" href="/assets/sepay-checkout.css">
+</head>
+<body class="sepay-page">
+  <main class="sepay-shell">
+    <header class="sepay-header">
+      <h1>Thanh toán VietQR</h1>
+      <a href="/template/">Quay lại danh sách</a>
+    </header>
+
+    <section class="sepay-grid">
+      <article class="sepay-panel">
+        <h2 data-product>Đang tải đơn hàng</h2>
+        <div class="sepay-details">
+          <div class="sepay-row"><span>Mã đơn</span><strong data-code></strong></div>
+          <div class="sepay-row"><span>Số tiền</span><strong data-amount></strong></div>
+          <div class="sepay-row"><span>Ngân hàng</span><strong data-bank></strong></div>
+          <div class="sepay-row"><span>Số tài khoản</span><strong data-account></strong></div>
+          <div class="sepay-row"><span>Chủ tài khoản</span><strong data-account-name></strong></div>
+          <div class="sepay-row"><span>Nội dung CK</span><strong class="sepay-code" data-transfer></strong></div>
+        </div>
+        <div class="sepay-status" data-status data-state="pending">Đang chờ thanh toán</div>
+        <a class="sepay-primary-link" data-activation href="#">Kích hoạt tài khoản</a>
+        <button class="sepay-dev-button" data-dev-pay type="button">Giả lập đã thanh toán</button>
+      </article>
+
+      <aside class="sepay-panel sepay-qr">
+        <h2>Quét mã QR</h2>
+        <img data-qr alt="QR thanh toán">
+        <p>Vui lòng giữ đúng số tiền và nội dung chuyển khoản.</p>
+      </aside>
+    </section>
+  </main>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get("code");
+    const els = {
+      product: document.querySelector("[data-product]"),
+      code: document.querySelector("[data-code]"),
+      amount: document.querySelector("[data-amount]"),
+      bank: document.querySelector("[data-bank]"),
+      account: document.querySelector("[data-account]"),
+      accountName: document.querySelector("[data-account-name]"),
+      transfer: document.querySelector("[data-transfer]"),
+      status: document.querySelector("[data-status]"),
+      activation: document.querySelector("[data-activation]"),
+      devPay: document.querySelector("[data-dev-pay]"),
+      qr: document.querySelector("[data-qr]")
+    };
+    const isLocal = ["localhost", "127.0.0.1"].includes(window.location.hostname);
+    initDemoButton();
+
+    async function initDemoButton() {
+      let demoEnabled = isLocal;
+      try {
+        const response = await fetch("/api/config");
+        const data = await response.json();
+        demoEnabled = demoEnabled || Boolean(data.demoPaymentEnabled);
+      } catch {}
+      if (!demoEnabled) return;
+      els.devPay.classList.add("is-visible");
+      els.devPay.addEventListener("click", simulatePaid);
+    }
+
+    if (!code) {
+      setStatus("expired", "Thiếu mã đơn hàng");
+    } else {
+      loadOrder();
+      setInterval(loadOrder, 3000);
+    }
+
+    async function loadOrder() {
+      try {
+        const response = await fetch(`/api/orders/${encodeURIComponent(code)}`);
+        const data = await response.json();
+        if (!response.ok) throw new Error("Không tìm thấy đơn hàng");
+        renderOrder(data.order);
+      } catch (error) {
+        setStatus("expired", error.message);
+      }
+    }
+
+    function renderOrder(order) {
+      els.product.textContent = order.productTitle;
+      els.code.textContent = order.code;
+      els.amount.textContent = order.amountText;
+      els.bank.textContent = order.bankCode;
+      els.account.textContent = order.accountNumber || "Chưa cấu hình";
+      els.accountName.textContent = order.accountName || "Chưa cấu hình";
+      els.transfer.textContent = order.transferContent;
+      els.qr.src = order.qrUrl;
+
+      if (order.status === "paid" || order.status === "activated") {
+        setStatus(order.status, order.status === "activated" ? "Tài khoản đã kích hoạt" : "Đã nhận thanh toán");
+        els.activation.href = order.activationUrl;
+        els.activation.classList.add("is-visible");
+      } else if (order.status === "expired") {
+        setStatus("expired", "Đơn hàng đã hết hạn");
+        els.activation.classList.remove("is-visible");
+      } else {
+        setStatus("pending", "Đang chờ SePay xác nhận giao dịch");
+        els.activation.classList.remove("is-visible");
+      }
+    }
+
+    function setStatus(state, text) {
+      els.status.dataset.state = state;
+      els.status.textContent = text;
+    }
+
+    async function simulatePaid() {
+      els.devPay.disabled = true;
+      els.devPay.textContent = "Đang giả lập...";
+      try {
+        const response = await fetch("/api/test/mark-paid", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ code, adminToken: "dev-admin", demo: true })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message || "Không giả lập được");
+        renderOrder(data.order);
+        els.devPay.textContent = "Đã giả lập thanh toán";
+      } catch (error) {
+        els.devPay.disabled = false;
+        els.devPay.textContent = error.message;
+      }
+    }
+  </script>
+</body>
+</html>
