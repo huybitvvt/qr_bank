@@ -864,7 +864,8 @@ function resolveAuthMode() {
 }
 
 function env(key, fallback) {
-  return process.env[key] || fallback;
+  if (!(key in process.env) || process.env[key] === "") return fallback;
+  return String(process.env[key]).replace(/^\uFEFF/, "").trim();
 }
 
 function numberEnv(key, fallback) {
